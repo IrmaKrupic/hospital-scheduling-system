@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1767535920000",
+    "username": "lamija",
+    "password": "lamija",
+    "firstName": "Lamija",
+    "lastName": "Ahmetagic",
+    "dob": "2003-12-17",
+    "cardId": "123456789",
+    "cardExpiry": "2026-06-30",
+    "appointments": [
+      {
+        "id": "1767621643760",
+        "patientId": "1767535920000",
+        "patientName": "undefined undefined",
+        "doctorId": "1767535919038",
+        "doctorName": "Irma",
+        "department": "Family Medicine",
+        "date": "2026-01-14",
+        "time": "14:00",
+        "notes": "",
+        "status": "approved"
+      },
+      {
+        "id": "1767623684354",
+        "patientId": "1767535920000",
+        "patientName": "Lamija Ahmetagic",
+        "doctorId": "1767535919038",
+        "doctorName": "Dr. Irma",
+        "department": "Family Medicine",
+        "date": "2026-01-13",
+        "time": "13:00",
+        "notes": "",
+        "status": "approved"
+      }
+    ]
+  }
+]

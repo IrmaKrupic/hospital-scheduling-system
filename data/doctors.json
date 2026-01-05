@@ -1,0 +1,77 @@
+[
+  {
+    "username": "Irma",
+    "password": "doctorirma",
+    "department": "Family Medicine",
+    "id": "1767535919038",
+    "workingDays": [
+      2,
+      3,
+      4
+    ],
+    "startTime": "09:00",
+    "endTime": "17:00",
+    "duration": 30,
+    "appointments": [
+      {
+        "id": "1767621643760",
+        "patientId": "1767535920000",
+        "patientName": "undefined undefined",
+        "doctorId": "1767535919038",
+        "doctorName": "Irma",
+        "department": "Family Medicine",
+        "date": "2026-01-14",
+        "time": "14:00",
+        "notes": "",
+        "status": "approved"
+      },
+      {
+        "id": "1767623684354",
+        "patientId": "1767535920000",
+        "patientName": "Lamija Ahmetagic",
+        "doctorId": "1767535919038",
+        "doctorName": "Dr. Irma",
+        "department": "Family Medicine",
+        "date": "2026-01-13",
+        "time": "13:00",
+        "notes": "",
+        "status": "approved"
+      }
+    ]
+  },
+  {
+    "username": "Hana",
+    "password": "doctorhana",
+    "department": "Pediatrics"
+  },
+  {
+    "username": "Tarik",
+    "password": "doctortarik",
+    "department": "Laboratory"
+  },
+  {
+    "username": "Faris",
+    "password": "doctorfaris",
+    "department": "Dentistry"
+  },
+  {
+    "username": "Amina",
+    "password": "doctoramina",
+    "department": "Neurology"
+  },
+  {
+    "username": "Lejla",
+    "password": "doctorlejla",
+    "department": "Gynecology"
+  },
+  {
+    "username": "Mak",
+    "password": "doctormak",
+    "department": "Internal Medicine"
+  },
+  {
+    "username": "Aida",
+    "password": "doctoraida",
+    "department": "Dermatology"
+  }
+]

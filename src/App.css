@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Minimal custom styles - most styling now handled by Tailwind */
+/* Only keep print styles and any truly custom styles that can't be done with Tailwind */
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+
+  .sidebar,
+  .dashboard-greeting,
+  .patient-dashboard-content,
+  .patient-my-appointments-view {
+    display: none !important;
+  }
+
+  .print-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #333;
+  }
+
+  .print-header h1 {
+    color: #1e40af;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .print-header h2 {
+    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .print-date {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #333;
+    padding: 0.75rem;
+    text-align: left;
+  }
+
+  .print-table th {
+    background: #f3f4f6;
+    font-weight: 700;
+    color: #1e40af;
+  }
+
+  .print-table tr:nth-child(even) {
+    background: #f9fafb;
+  }
+}
