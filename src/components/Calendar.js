@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Calendar({ onDateSelect, appointments = [], selectedDateStr = null }) {
+function Calendar({ onDateSelect, appointments = [], selectedDateStr = null, workingDays = null }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(() => {
     if (selectedDateStr) {
@@ -64,9 +64,31 @@ function Calendar({ onDateSelect, appointments = [], selectedDateStr = null }) {
       currentDate.getFullYear() === selectedDate.getFullYear();
   };
 
-  const hasAppointments = (day) => {
+  const getAppointmentStatusForDay = (day) => {
+    const toYmd = (value) => {
+      if (!value) return null;
+      if (typeof value === 'string') {
+        const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (match) return match[1];
+      }
+      try {
+        const d = new Date(value);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${dd}`;
+      } catch {
+        return null;
+      }
+    };
     const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return appointments.some(apt => apt.date === dateStr);
+    const dayAppointments = appointments.filter(apt => toYmd(apt.date) === dateStr);
+    if (dayAppointments.length === 0) return null;
+    const hasApproved = dayAppointments.some(apt => apt.status === 'approved');
+    const hasPending = dayAppointments.some(apt => apt.status === 'pending' || !apt.status);
+    if (hasApproved) return 'approved';
+    if (hasPending) return 'pending';
+    return 'other';
   };
 
   const days = getDaysInMonth(currentDate);
@@ -101,13 +123,32 @@ function Calendar({ onDateSelect, appointments = [], selectedDateStr = null }) {
           {days.map((day, index) => (
             <div
               key={index}
-              className={`
-                aspect-square flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-all text-sm
-                ${!day ? 'border-transparent' : ''}
-                ${isToday(day) ? 'border-2 border-blue-400 dark:border-blue-500 font-semibold' : 'border-gray-300 dark:border-gray-600'}
-                ${isSelected(day) ? 'bg-blue-500 dark:bg-blue-600 text-white font-semibold' : 'hover:bg-blue-50 dark:hover:bg-gray-700'}
-                ${day && hasAppointments(day) ? 'bg-blue-100 dark:bg-blue-900 font-semibold' : ''}
-              `}
+              className={(() => {
+                const base =
+                  'aspect-square flex items-center justify-center p-2 border rounded-lg cursor-pointer transition-all text-sm dark:text-gray-200';
+                if (!day) return `${base} border-transparent`;
+                const dateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const dayOfWeek = dateObj.getDay();
+                const isNonWorking =
+                  Array.isArray(workingDays) && !workingDays.includes(dayOfWeek);
+                const apptStatus = getAppointmentStatusForDay(day);
+                const todayCls = isToday(day)
+                  ? 'border-2 border-blue-400 dark:border-blue-500 font-semibold'
+                  : 'border-gray-300 dark:border-gray-600';
+                const selectedCls = isSelected(day)
+                  ? 'bg-blue-500 dark:bg-blue-600 text-white font-semibold'
+                  : 'hover:bg-blue-50 dark:hover:bg-gray-700';
+                const apptCls =
+                  apptStatus === 'approved'
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-300 dark:border-green-700 font-semibold'
+                    : apptStatus === 'pending'
+                    ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 border-yellow-300 dark:border-yellow-700 font-semibold'
+                    : '';
+                const nonWorkCls = isNonWorking
+                  ? 'bg-red-50 text-red-600 dark:bg-red-900/40 dark:text-red-300 border-red-300 dark:border-red-700 hover:bg-red-100 dark:hover:bg-red-900/60'
+                  : '';
+                return [base, todayCls, selectedCls, apptCls, nonWorkCls].join(' ').trim();
+              })()}
               onClick={() => handleDateClick(day)}
             >
               {day}

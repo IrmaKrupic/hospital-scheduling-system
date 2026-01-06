@@ -113,9 +113,40 @@ function DoctorDashboard() {
     return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const formatDateToDDMMYY = (dateString) => {
+  try {
+    const date = new Date(dateString);
+    
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = String(date.getUTCFullYear()).slice(-2);
+    
+    return `${day}-${month}-${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error, dateString);
+    return dateString;
+  }
+};
+
   const getAppointmentsForDate = (date) => {
     const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    return appointments.filter(apt => apt.date === dateStr);
+    
+    const filtered = appointments.filter(apt => {
+      
+      let aptDate = apt.date;
+      if (typeof aptDate === 'string') {
+        const match = aptDate.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (match) {
+          aptDate = match[1];
+        }
+      } else if (aptDate instanceof Date) {
+        aptDate = `${aptDate.getFullYear()}-${String(aptDate.getMonth() + 1).padStart(2, '0')}-${String(aptDate.getDate()).padStart(2, '0')}`;
+      }
+      
+      return aptDate === dateStr;
+    });
+    
+    return filtered;
   };
 
   const todaysAppointments = getAppointmentsForDate(selectedDate);
@@ -310,6 +341,7 @@ function DoctorDashboard() {
             <Calendar
               onDateSelect={handleDateSelect}
               appointments={appointments}
+              workingDays={workingHours.workingDays}
             />
 
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
@@ -344,26 +376,37 @@ function DoctorDashboard() {
                           {apt.status || 'pending'}
                         </span>
                       </p>
-                      <div className="flex gap-2 flex-wrap">
-                        <button 
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold"
-                          onClick={() => handleApproveAppointment(apt.id)}
-                        >
-                          Approve
-                        </button>
-                        <button 
-                          className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm font-semibold"
-                          onClick={() => handleRejectAppointment(apt.id)}
-                        >
-                          Reject
-                        </button>
-                        <button 
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
-                          onClick={() => handleDeleteAppointment(apt.id)}
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      {apt.status === 'approved' ? (
+                        <div className="flex gap-2 flex-wrap">
+                          <button 
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
+                            onClick={() => handleDeleteAppointment(apt.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 flex-wrap">
+                          <button 
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold"
+                            onClick={() => handleApproveAppointment(apt.id)}
+                          >
+                            Approve
+                          </button>
+                          <button 
+                            className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-sm font-semibold"
+                            onClick={() => handleRejectAppointment(apt.id)}
+                          >
+                            Reject
+                          </button>
+                          <button 
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
+                            onClick={() => handleDeleteAppointment(apt.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
@@ -381,7 +424,7 @@ function DoctorDashboard() {
           
           const renderAppointmentCard = (apt, index) => (
             <div key={index} className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700">
-              <p className="mb-2"><strong className="text-gray-700 dark:text-gray-300">Date:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.date}</span></p>
+              <p className="mb-2"><strong className="text-gray-700 dark:text-gray-300">Date:</strong> <span className="text-gray-900 dark:text-gray-100">{formatDateToDDMMYY(apt.date)}</span></p>
               <p className="mb-2"><strong className="text-gray-700 dark:text-gray-300">Time:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.time}</span></p>
               <p className="mb-2"><strong className="text-gray-700 dark:text-gray-300">Patient:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.patientName}</span></p>
               {apt.notes && <p className="mb-2"><strong className="text-gray-700 dark:text-gray-300">Notes:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.notes}</span></p>}

@@ -214,36 +214,40 @@ function PatientDashboard() {
   };
 
   return (
-    <div className="patient-dashboard">
+    <>
       {/* Print-only view */}
-      <div className="print-only">
-        <div className="print-header">
-          <h1>Hospital Scheduling System</h1>
-          <h2>Appointment Schedule for {user?.firstName || user?.firstname} {user?.lastName || user?.lastname}</h2>
-          <p className="print-date">Printed on: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      <div className="hidden print:block p-6">
+        <div className="mb-4">
+          <h1 className="text-xl font-bold">Hospital Scheduling System</h1>
+          <h2 className="text-lg">
+            Appointment Schedule for {user?.firstName || user?.firstname} {user?.lastName || user?.lastname}
+          </h2>
+          <p className="text-sm">
+            Printed on: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
-        <table className="print-table">
+        <table className="w-full border-collapse border border-gray-300">
           <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Doctor</th>
-              <th>Department</th>
-              <th>Status</th>
+            <tr className="border-b border-gray-300">
+              <th className="text-left px-3 py-2">Date</th>
+              <th className="text-left px-3 py-2">Time</th>
+              <th className="text-left px-3 py-2">Doctor</th>
+              <th className="text-left px-3 py-2">Department</th>
+              <th className="text-left px-3 py-2">Status</th>
             </tr>
           </thead>
           <tbody>
             {appointments.map((apt, index) => (
-              <tr key={index}>
-                <td>{apt.date}</td>
-                <td>{apt.time}</td>
-                <td>Dr. {apt.doctorName}</td>
-                <td>{apt.department}</td>
-                <td>
+              <tr key={index} className="border-b border-gray-200 text-sm">
+                <td className="px-3 py-2">{apt.date}</td>
+                <td className="px-3 py-2">{apt.time}</td>
+                <td className="px-3 py-2">Dr. {apt.doctorName}</td>
+                <td className="px-3 py-2">{apt.department}</td>
+                <td className="px-3 py-2">
                   {apt.status === 'pending' ? 'Waiting for Doctor\'s Approval' : 
-                   apt.status === 'approved' ? 'Approved by Doctor' : 
-                   apt.status === 'rejected' ? 'Rejected by Doctor' : 
-                   'Waiting for Doctor\'s Approval'}
+                    apt.status === 'approved' ? 'Approved by Doctor' : 
+                    apt.status === 'rejected' ? 'Rejected by Doctor' : 
+                    'Waiting for Doctor\'s Approval'}
                 </td>
               </tr>
             ))}
@@ -252,31 +256,56 @@ function PatientDashboard() {
       </div>
 
       {/* Regular screen view */}
-      <Sidebar
-        activeView={activeView}
-        onViewChange={handleViewChange}
-        userType="patient"
-        onLogout={handleLogout}
-        onBackAction={handleBackToDepartments}
-      />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex print:hidden">
+        <Sidebar
+          activeView={activeView}
+          onViewChange={handleViewChange}
+          userType="patient"
+          onLogout={handleLogout}
+          onBackAction={handleBackToDepartments}
+        />
 
-      <div className="main-content">
-        <div className="dashboard-greeting">
-          <h2>Welcome, {user?.firstName || user?.firstname} {user?.lastName || user?.lastname}!</h2>
+        <div className="flex-1 ml-64 p-8 pt-16">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-blue-800 dark:text-blue-300">
+            Welcome, {user?.firstName || user?.firstname} {user?.lastName || user?.lastname}!
+          </h2>
         </div>
+
         {activeView === 'booking' && (
-          <div className="patient-dashboard-content">
-            <h3>Book an Appointment</h3>
-            <div className="booking-form-container">
-              <form onSubmit={handleBookingSubmit} className="patient-booking-form">
-                <div className="form-group">
-                  <label htmlFor="doctorId">Select Doctor *</label>
+          <div className="space-y-6">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Book an Appointment</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Calendar */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-4">Select Date</h4>
+                <Calendar
+                  onDateSelect={(date) => {
+                    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    setFormData({ ...formData, date: dateStr });
+                    if (formData.doctorId) {
+                      generateAvailableTimes(formData.doctorId, dateStr);
+                    }
+                  }}
+                  appointments={appointments}
+                  selectedDateStr={formData.date}
+                  workingDays={(doctors.find(d => d.id === formData.doctorId)?.workingDays) || null}
+                />
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleBookingSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-5">
+                <div>
+                  <label htmlFor="doctorId" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Select Doctor *
+                  </label>
                   <select
                     id="doctorId"
                     name="doctorId"
                     value={formData.doctorId}
                     onChange={handleInputChange}
                     required
+                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Select a doctor...</option>
                     {doctors.map(doctor => (
@@ -287,65 +316,65 @@ function PatientDashboard() {
                   </select>
                 </div>
 
-                <div className="form-group full-width">
-                  <label>Appointment Date *</label>
-                  <div className="calendar-wrapper">
-                    <Calendar
-                      onDateSelect={(date) => {
-                        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-                        setFormData({ ...formData, date: dateStr });
-                        if (formData.doctorId) {
-                          generateAvailableTimes(formData.doctorId, dateStr);
-                        }
-                      }}
-                      appointments={[]}
-                      selectedDateStr={formData.date}
-                    />
-                  </div>
-                </div>
-
                 {formData.date && formData.doctorId && (
-                  <div className="form-group full-width">
-                    <label htmlFor="time">Appointment Time *</label>
-                    <div className="time-slots-grid">
+                  <div>
+                    <label htmlFor="time" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Appointment Time *
+                    </label>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {availableTimes.length > 0 ? (
-                        availableTimes.map(time => (
+                        availableTimes.map((time) => (
                           <button
                             key={time}
                             type="button"
-                            className={`time-slot-btn ${formData.time === time ? 'selected' : ''}`}
+                            className={`px-3 py-2 rounded-lg border-2 text-sm font-semibold transition-colors ${
+                              formData.time === time
+                                ? 'bg-blue-600 border-blue-600 text-white'
+                                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-100 hover:border-blue-400'
+                            }`}
                             onClick={() => setFormData({ ...formData, time })}
                           >
                             {time}
                           </button>
                         ))
                       ) : (
-                        <p className="no-times-message">No available times for this date</p>
+                        <p className="col-span-3 sm:col-span-4 text-gray-500 dark:text-gray-400">No available times for this date</p>
                       )}
                     </div>
                   </div>
                 )}
 
-
-                <div className="form-group full-width">
-                  <label htmlFor="notes">Additional Notes</label>
+                <div>
+                  <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Additional Notes
+                  </label>
                   <textarea
                     id="notes"
                     name="notes"
                     value={formData.notes}
                     onChange={handleInputChange}
-                    rows="2"
+                    rows="3"
                     placeholder="Describe your symptoms or reason for visit..."
+                    className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   ></textarea>
                 </div>
 
                 {message.text && (
-                  <div className={`${message.type}-message full-width`} style={{ display: 'block' }}>
+                  <div
+                    className={`px-4 py-3 rounded-lg border-2 ${
+                      message.type === 'error'
+                        ? 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-700 text-red-700 dark:text-red-300'
+                        : 'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-700 text-green-700 dark:text-green-300'
+                    }`}
+                  >
                     {message.text}
                   </div>
                 )}
 
-                <button type="submit" className="submit-booking-btn full-width">
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
                   Book Appointment
                 </button>
               </form>
@@ -354,26 +383,39 @@ function PatientDashboard() {
         )}
 
         {activeView === 'appointments' && (
-          <div className="patient-my-appointments-view">
-            <h3>My Appointments</h3>
-            <div className="patient-appointments-list">
+          <div className="space-y-4">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200">My Appointments</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {appointments.length > 0 ? (
                 appointments.map((apt, index) => (
-                  <div key={index} className={`appointment-card status-${apt.status || 'pending'}`}>
-                    <p><strong>Doctor:</strong> Dr. {apt.doctorName}</p>
-                    <p><strong>Department:</strong> {apt.department}</p>
-                    <p><strong>Date:</strong> {apt.date}</p>
-                    <p><strong>Time:</strong> {apt.time}</p>
-                    {apt.notes && <p><strong>Notes:</strong> {apt.notes}</p>}
-                    <p><strong>Status:</strong> <span className={`status-badge ${apt.status}`}>
-                      {apt.status === 'pending' ? 'Waiting for Doctor\'s Approval' : 
-                       apt.status === 'approved' ? 'Approved by Doctor' : 
-                       apt.status === 'rejected' ? 'Rejected by Doctor' : 
-                       'Waiting for Doctor\'s Approval'}
-                    </span></p>
+                  <div
+                    key={index}
+                    className={`p-4 border-2 rounded-lg bg-white dark:bg-gray-800 ${
+                      apt.status === 'approved'
+                        ? 'border-green-200 dark:border-green-700'
+                        : apt.status === 'rejected'
+                        ? 'border-red-200 dark:border-red-700'
+                        : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    <p className="mb-1"><strong className="text-gray-700 dark:text-gray-300">Doctor:</strong> <span className="text-gray-900 dark:text-gray-100">Dr. {apt.doctorName}</span></p>
+                    <p className="mb-1"><strong className="text-gray-700 dark:text-gray-300">Department:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.department}</span></p>
+                    <p className="mb-1"><strong className="text-gray-700 dark:text-gray-300">Date:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.date}</span></p>
+                    <p className="mb-3"><strong className="text-gray-700 dark:text-gray-300">Time:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.time}</span></p>
+                    {apt.notes && <p className="mb-3"><strong className="text-gray-700 dark:text-gray-300">Notes:</strong> <span className="text-gray-900 dark:text-gray-100">{apt.notes}</span></p>}
+                    <p className="mb-3">
+                      <strong className="text-gray-700 dark:text-gray-300">Status:</strong>{' '}
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
+                        apt.status === 'approved' ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300' :
+                        apt.status === 'rejected' ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300' :
+                        'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
+                      }`}>
+                        {apt.status || 'pending'}
+                      </span>
+                    </p>
                     {apt.status !== 'rejected' && (
                       <button
-                        className="cancel-btn"
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"
                         onClick={() => handleCancelAppointment(apt.id)}
                       >
                         Cancel Appointment
@@ -382,24 +424,24 @@ function PatientDashboard() {
                   </div>
                 ))
               ) : (
-                <p>No appointments scheduled</p>
+                <p className="col-span-2 text-center text-gray-500 dark:text-gray-400 py-8">No appointments scheduled</p>
               )}
             </div>
           </div>
         )}
+        </div>
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal({ isOpen: false, appointmentId: null })}
+          onConfirm={handleConfirmCancel}
+          title="Cancel Appointment"
+          message="Are you sure you want to cancel this appointment?"
+          confirmText="Cancel Appointment"
+          cancelText="Keep Appointment"
+          variant="warning"
+        />
       </div>
-
-      <ConfirmModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ isOpen: false, appointmentId: null })}
-        onConfirm={handleConfirmCancel}
-        title="Cancel Appointment"
-        message="Are you sure you want to cancel this appointment?"
-        confirmText="Cancel Appointment"
-        cancelText="Keep Appointment"
-        variant="warning"
-      />
-    </div>
+    </>
   );
 }
 
